@@ -16,8 +16,11 @@
 #define USART2EN (1U << 17) // APB1
 
 // USART
-#define CR1_TE (1U << 3)
-#define CR1_UE (1U << 13)
+#define CR1_RE     (1U << 2)
+#define CR1_TE     (1U << 3)
+#define CR1_RXNEIE (1U << 5)
+#define CR1_UE     (1U << 13)
+
 #define SR_TXE (1U << 7)
 
 // CLK
@@ -45,7 +48,7 @@ void usart2_init(void)
     RCC->APB2ENR |= GPIOAEN;
     RCC->APB2ENR |= AFIOEN;
 
-    // Set PA2 to AF Out dir
+    // Set PA2 to AF Out dir (PA3 set as input by default)
     GPIOA->CRL |= (1U << 8);
     GPIOA->CRL &= ~(1U << 9);
     GPIOA->CRL &= ~(1U << 10);
@@ -57,8 +60,13 @@ void usart2_init(void)
 
     // Configure the USART
     uart_set_baudrate(USART2, APB1_CLK, UART_BAUDRATE);
-    // Configure xfer direction
-    USART2->CR1 = CR1_TE;
+
+    // Configure xfer direction (TX channel and RX by interrupt)
+    USART2->CR1 = (CR1_TE | CR1_RE | CR1_RXNEIE);
+
+    // Enable NVIC for the RX
+    NVIC_EnableIRQ(USART2_IRQn);
+
     // Enable the USART module
     USART2->CR1 |= CR1_UE;
 }

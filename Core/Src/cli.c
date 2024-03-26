@@ -6,6 +6,8 @@
  */
 #include "cli.h"
 
+#include "tim_driver.h"
+
 #include <string.h>
 
 #define MAX_ARGC (2u)
@@ -20,6 +22,7 @@ typedef struct
 cli_menu_t cli_menu[] = {{"barrier", cmd_servo, "Control the servomotor : (open/close)"},
                          {"display", cmd_oled, "Display a msg on the OLED screen : (<string>)"},
                          {"distance", cmd_us_sensor, "Read the obstacle distance from the US sensor"},
+                         {"pulse", cmd_send_pulse, "Send a 10us pulse"},
                          {0, 0, 0}};
 
 str_status_t str_status[] = {{STATUS_OK, "Tout va bien"},
@@ -138,6 +141,15 @@ cli_status_t cmd_oled(int argc, char **argv)
 cli_status_t cmd_us_sensor(int argc, char **argv)
 {
     cli_status_t status = STATUS_OK;
+
+    return status;
+}
+
+cli_status_t cmd_send_pulse(int argc, char **argv)
+{
+    cli_status_t status = STATUS_OK;
+
+    tim2_start();
 
     return status;
 }

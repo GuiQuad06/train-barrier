@@ -17,16 +17,17 @@
  */
 
 #include "cli.h"
+#include "tim_driver.h"
 #include "usart_driver.h"
 
 // Used for Register reading in ISR:
 #include "stm32f1xx.h"
+#define SR_RXNE  (1U << 5)
+#define SR_CC2IF (1U << 2)
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
-#define SR_RXNE (1U << 5)
 
 volatile uint8_t message_received = 0;
 
@@ -49,11 +50,27 @@ static void USART2_RX_callback(void)
     }
 }
 
+static void TIM2_callback(void)
+{
+    // When CNT > CCR the irq is triggered and the output is set to 0
+    // So timer is stopped as we want only one pulse for the US sensor trigger
+    tim2_stop();
+}
+
 void USART2_IRQHandler(void)
 {
     if (USART2->SR & SR_RXNE)
     {
         USART2_RX_callback();
+    }
+}
+
+void TIM2_IRQHandler(void)
+{
+    if (TIM2->SR & SR_CC2IF)
+    {
+        TIM2->SR &= ~(SR_CC2IF | SR_UIF);
+        TIM2_callback();
     }
 }
 
@@ -67,6 +84,7 @@ int __io_putchar(int c)
 int main(void)
 {
     usart2_init();
+    tim2_init();
 
     printf("Bienvenue dans l'application de test hardware de la barriere de Train !!\n");
 

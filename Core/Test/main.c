@@ -24,6 +24,7 @@
 // Used for Register reading in ISR:
 #include "stm32f1xx.h"
 #define SR_RXNE  (1U << 5)
+#define SR_CC1IF (1U << 1)
 #define SR_CC2IF (1U << 2)
 
 #include <stdint.h>
@@ -66,6 +67,13 @@ void USART2_IRQHandler(void)
     }
 }
 
+void TIM1_CC_IRQHandler(void)
+{
+    if (TIM1->SR & SR_CC1IF)
+    {
+    }
+}
+
 void TIM2_IRQHandler(void)
 {
     if (TIM2->SR & SR_CC2IF)
@@ -85,6 +93,7 @@ int __io_putchar(int c)
 int main(void)
 {
     rcc_init();
+    tim1_init();
     tim2_init();
     usart2_init();
 

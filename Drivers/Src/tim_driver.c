@@ -18,12 +18,18 @@
 // TIM registers
 // CR1
 #define CEN    (1U << 0)
+#define ARPE   (1U << 7)
 // DIER
+#define CC1IE  (1U << 1)
 #define CC2IE  (1U << 2)
 // CCMR1
+#define CC1S_0 (1U << 0)
+#define IC1F_1 (1U << 5)
+#define IC1F_0 (1U << 4)
 #define OC2M_2 (1U << 14)
 #define OC2M_1 (1U << 13)
 // CCER
+#define CC1E   (1U << 0)
 #define CC2P   (1U << 5)
 #define CC2E   (1U << 4)
 
@@ -35,6 +41,31 @@ static inline uint16_t tune_prescaler(uint32_t occ, uint32_t clk)
 {
     // PSC = (PS_CK / FREQ_TIM -1) + 1
     return (clk / occ) - 1;
+}
+
+void tim1_init(void)
+{
+    // IO PA8 -> TIM1_CH1 : intput dir / AFIO (already input mode by default) do nothing
+
+    // Set the Prescaler
+    TIM1->PSC = 0u;
+
+    // Write the ARR
+    TIM1->ARR = MAX_COUNT;
+
+    // Autoreload preload enable
+    TIM1->CR1 |= ARPE;
+
+    // Select active input: IC1 (so TI1) to CCR1 (CCMR1 reg) + input filter
+    TIM1->CCMR1 |= (CC1S_0 | IC1F_1 | IC1F_0);
+
+    // Enable capture (CCER reg)
+    TIM1->CCER |= CC1E;
+
+    // Set CCxIE for interrupt
+    TIM1->DIER |= CC1IE;
+    // Enable NVIC for the TIMER
+    NVIC_EnableIRQ(TIM1_CC_IRQn);
 }
 
 void tim2_init(void)

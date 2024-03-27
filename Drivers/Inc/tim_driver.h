@@ -8,6 +8,7 @@
 #ifndef INC_TIM_DRIVER_H_
 #define INC_TIM_DRIVER_H_
 
+void tim1_init(void);
 void tim2_init(void);
 void tim2_start(void);
 void tim2_stop(void);

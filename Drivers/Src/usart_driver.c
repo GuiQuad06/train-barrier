@@ -6,14 +6,10 @@
  */
 #include "usart_driver.h"
 
+#include "rcc_driver.h"
 #include "stm32f1xx.h"
 
 #include <stdint.h>
-
-// RCC
-#define GPIOAEN  (1U << 2)  // APB2
-#define AFIOEN   (1U << 0)  // APB2
-#define USART2EN (1U << 17) // APB1
 
 // USART
 #define CR1_RE     (1U << 2)
@@ -24,8 +20,6 @@
 #define SR_TXE (1U << 7)
 
 // CLK
-#define SYS_FREQ      (8000000U)
-#define APB1_CLK      SYS_FREQ
 #define UART_BAUDRATE (9600U)
 
 static void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t periph_clk, uint32_t baud_rate);
@@ -43,20 +37,11 @@ void usart2_write(int ch)
 
 void usart2_init(void)
 {
-    // Configure USART GPIO pin
-    // Enable Clock access to GPIOA + Alternate Functions
-    RCC->APB2ENR |= GPIOAEN;
-    RCC->APB2ENR |= AFIOEN;
-
     // Set PA2 to AF Out dir (PA3 set as input by default)
     GPIOA->CRL |= (1U << 8);
     GPIOA->CRL &= ~(1U << 9);
     GPIOA->CRL &= ~(1U << 10);
     GPIOA->CRL |= (1U << 11);
-
-    // Configure USART Module
-    // Enable clock access to USART 2
-    RCC->APB1ENR |= USART2EN;
 
     // Configure the USART
     uart_set_baudrate(USART2, APB1_CLK, UART_BAUDRATE);

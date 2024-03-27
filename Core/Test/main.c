@@ -17,6 +17,7 @@
  */
 
 #include "cli.h"
+#include "rcc_driver.h"
 #include "tim_driver.h"
 #include "usart_driver.h"
 
@@ -83,8 +84,9 @@ int __io_putchar(int c)
 
 int main(void)
 {
-    usart2_init();
+    rcc_init();
     tim2_init();
+    usart2_init();
 
     printf("Bienvenue dans l'application de test hardware de la barriere de Train !!\n");
 

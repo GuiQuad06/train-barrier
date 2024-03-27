@@ -7,6 +7,7 @@
 
 #include "tim_driver.h"
 
+#include "rcc_driver.h"
 #include "stm32f1xx.h"
 
 #include <stdint.h>

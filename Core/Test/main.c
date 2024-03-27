@@ -26,12 +26,14 @@
 #define SR_RXNE  (1U << 5)
 #define SR_CC1IF (1U << 1)
 #define SR_CC2IF (1U << 2)
+#define SR_UIF   (1U << 0)
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 volatile uint8_t message_received = 0;
+volatile uint8_t cnt              = 0;
 
 static uint8_t rx_buf;
 static uint8_t byte_count = 0;
@@ -59,6 +61,16 @@ static void TIM2_callback(void)
     tim2_stop();
 }
 
+static void TIM3_callback(void)
+{
+    /*	if (cnt > 100)
+        {
+            tim3_stop();
+            cnt = 0;
+        }
+        cnt++;*/
+}
+
 void USART2_IRQHandler(void)
 {
     if (USART2->SR & SR_RXNE)
@@ -83,6 +95,15 @@ void TIM2_IRQHandler(void)
     }
 }
 
+void TIM3_IRQHandler(void)
+{
+    if (TIM3->SR & SR_CC1IF)
+    {
+        TIM3->SR &= ~(SR_CC1IF | SR_UIF);
+        TIM3_callback();
+    }
+}
+
 int __io_putchar(int c)
 {
     usart2_write(c);
@@ -95,6 +116,7 @@ int main(void)
     rcc_init();
     tim1_init();
     tim2_init();
+    tim3_init();
     usart2_init();
 
     printf("Bienvenue dans l'application de test hardware de la barriere de Train !!\n");

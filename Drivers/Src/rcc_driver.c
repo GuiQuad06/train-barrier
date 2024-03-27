@@ -12,6 +12,7 @@
 // RCC
 // APB1 bus
 #define TIM2EN   (1U << 0)
+#define TIM3EN   (1U << 1)
 #define USART2EN (1U << 17)
 // APB2 bus
 #define AFIOEN   (1U << 0)
@@ -24,6 +25,8 @@ void rcc_init(void)
     RCC->APB2ENR |= TIM1EN;
     // Enable TIM2 for RCC PoV (CLK)
     RCC->APB1ENR |= TIM2EN;
+    // Enable TIM3 for RCC PoV (CLK)
+    RCC->APB1ENR |= TIM3EN;
     // Configure USART Module
     // Enable clock access to USART 2
     RCC->APB1ENR |= USART2EN;

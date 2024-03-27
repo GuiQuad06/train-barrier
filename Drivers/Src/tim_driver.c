@@ -26,16 +26,23 @@
 #define CC1S_0 (1U << 0)
 #define IC1F_1 (1U << 5)
 #define IC1F_0 (1U << 4)
+#define OC1M_2 (1U << 6)
+#define OC1M_1 (1U << 5)
 #define OC2M_2 (1U << 14)
 #define OC2M_1 (1U << 13)
 // CCER
+#define CC1P   (1U << 1)
 #define CC1E   (1U << 0)
 #define CC2P   (1U << 5)
 #define CC2E   (1U << 4)
 
 // CLK
-#define TIM2_COUNT_FREQ (100000u) // 100kHz (10 us period)
-#define MAX_COUNT       UINT16_MAX
+#define TIM2_COUNT_FREQ  (100000u)  // 100kHz (10 us cycle)
+#define TIM3_COUNT_FREQ  (4000000u) // 4 MHz (250 ns cycle)
+#define TIM3_COUNT_F_MHZ (4u)
+#define MAX_COUNT        UINT16_MAX
+
+#define NOMINAL_PULSE_WIDTH (1500u) // Servo Nominal Pulse width in um
 
 static inline uint16_t tune_prescaler(uint32_t occ, uint32_t clk)
 {
@@ -51,7 +58,7 @@ void tim1_init(void)
     TIM1->PSC = 0u;
 
     // Write the ARR
-    TIM1->ARR = MAX_COUNT;
+    TIM1->ARR = MAX_COUNT - 1u;
 
     // Autoreload preload enable
     TIM1->CR1 |= ARPE;
@@ -90,6 +97,28 @@ void tim2_init(void)
     TIM2->CCMR1 |= (OC2M_2 | OC2M_1);
 }
 
+void tim3_init(void)
+{
+    // IO PA6 -> TIM3_CH1 : output dir / AFIO push pull
+    GPIOA->CRL |= (1U << 24);
+    GPIOA->CRL &= ~(1U << 25);
+    GPIOA->CRL &= ~(1U << 26);
+    GPIOA->CRL |= (1U << 27);
+
+    // Tune prescaler
+    TIM3->PSC = tune_prescaler(TIM3_COUNT_FREQ, APB1_CLK);
+
+    // Write the ARR & CCR
+    TIM3->ARR  = MAX_COUNT - 1u;                         // 65535 x 250 ns = 20 ms
+    TIM3->CCR1 = NOMINAL_PULSE_WIDTH * TIM3_COUNT_F_MHZ; // 1500 us pulse width (nominal for servo)
+
+    // Set CCxIE for interrupt
+    TIM3->DIER |= CC1IE;
+
+    // OCxM=110, OCxPE=0 (default), to OC2 PWM mode 1
+    TIM3->CCMR1 |= (OC1M_2 | OC1M_1);
+}
+
 void tim2_start(void)
 {
     // CCxP=1 and CCxE=1
@@ -112,4 +141,28 @@ void tim2_stop(void)
 
     // Disable Timer with CEN
     TIM2->CR1 &= ~(CEN);
+}
+
+void tim3_start(void)
+{
+    // CCxP=0 and CCxE=1
+    TIM3->CCER |= CC1E;
+
+    // Enable NVIC for the TIMER
+    NVIC_EnableIRQ(TIM3_IRQn);
+
+    // Enable Timer with CEN
+    TIM3->CR1 |= CEN;
+}
+
+void tim3_stop(void)
+{
+    // CCxP=0 and CCxE=0
+    TIM3->CCER &= ~(CC1E);
+
+    // Disable NVIC for the TIMER
+    NVIC_DisableIRQ(TIM3_IRQn);
+
+    // Disable Timer with CEN
+    TIM3->CR1 &= ~(CEN);
 }

@@ -18,7 +18,8 @@ typedef enum
     STATUS_OK,
     STATUS_KO,
     STATUS_TOO_MANY_ARGS,
-    STATUS_PARAMETER_MISSING
+    STATUS_PARAMETER_MISSING,
+    STATUS_PARAMETER_UNKNOWN
 } cli_status_t;
 
 typedef struct
@@ -37,5 +38,6 @@ cli_status_t cmd_servo(int argc, char **argv);
 cli_status_t cmd_oled(int argc, char **argv);
 cli_status_t cmd_us_sensor(int argc, char **argv);
 cli_status_t cmd_send_pulse(int argc, char **argv);
+cli_status_t cmd_pwm_servo(int argc, char **argv);
 
 #endif /* INC_CLI_H_ */

@@ -23,6 +23,7 @@ cli_menu_t cli_menu[] = {{"barrier", cmd_servo, "Control the servomotor : (open/
                          {"display", cmd_oled, "Display a msg on the OLED screen : (<string>)"},
                          {"distance", cmd_us_sensor, "Read the obstacle distance from the US sensor"},
                          {"pulse", cmd_send_pulse, "Send a 10us pulse"},
+                         {"pwm", cmd_pwm_servo, "Control PWM : (start/stop)"},
                          {0, 0, 0}};
 
 str_status_t str_status[] = {{STATUS_OK, "Tout va bien"},
@@ -151,5 +152,31 @@ cli_status_t cmd_send_pulse(int argc, char **argv)
 
     tim2_start();
 
+    return status;
+}
+
+cli_status_t cmd_pwm_servo(int argc, char **argv)
+{
+    cli_status_t status = STATUS_OK;
+
+    if (argc < 1)
+    {
+        return STATUS_PARAMETER_MISSING;
+    }
+    else
+    {
+        if (!strcmp(argv[1], "start"))
+        {
+            tim3_start();
+        }
+        else if (!strcmp(argv[1], "stop"))
+        {
+            tim3_stop();
+        }
+        else
+        {
+            return STATUS_PARAMETER_UNKNOWN;
+        }
+    }
     return status;
 }

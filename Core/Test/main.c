@@ -17,6 +17,7 @@
  */
 
 #include "cli.h"
+#include "gpio_driver.h"
 #include "rcc_driver.h"
 #include "servo.h"
 #include "stm32f1xx.h"
@@ -41,6 +42,8 @@ static char cli_cmd[INPUT_BUF_SIZE]; /** Input buffer for the command line inter
 static void init_drivers(void)
 {
     rcc_init();
+
+    gpio_init();
 
     // Com UART for CLI
     usart2_init();

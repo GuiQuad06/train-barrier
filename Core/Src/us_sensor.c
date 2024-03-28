@@ -7,6 +7,7 @@
 
 #include "us_sensor.h"
 
+#include "gpio_driver.h"
 #include "stm32f1xx.h"
 #include "tim_driver.h"
 
@@ -44,10 +45,12 @@ status_us_t us_sensor_read_dist(void)
     if (us_sensor.dist < FIVE_CM)
     {
         // Set GPIO
+        gpio_set(GPIOA, 5u);
     }
     else
     {
         // Reset GPIO
+        gpio_reset(GPIOA, 5u);
     }
     return US_OK;
 }

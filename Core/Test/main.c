@@ -19,15 +19,9 @@
 #include "cli.h"
 #include "rcc_driver.h"
 #include "servo.h"
+#include "stm32f1xx.h"
 #include "tim_driver.h"
 #include "usart_driver.h"
-
-// Used for Register reading in ISR:
-#include "stm32f1xx.h"
-#define SR_RXNE  (1U << 5)
-#define SR_CC1IF (1U << 1)
-#define SR_CC2IF (1U << 2)
-#define SR_UIF   (1U << 0)
 
 #include <stdint.h>
 #include <stdio.h>
@@ -53,7 +47,7 @@ static void init_drivers(void)
     usart2_init();
 }
 
-static void USART2_RX_callback(void)
+void USART2_RX_callback(void)
 {
     rx_buf = USART2->DR;
 
@@ -65,45 +59,6 @@ static void USART2_RX_callback(void)
     {
         NVIC_DisableIRQ(USART2_IRQn);
         message_received = 1;
-    }
-}
-
-static void TIM2_callback(void)
-{
-    // When CNT > CCR the irq is triggered and the output is set to 0
-    // So timer is stopped as we want only one pulse for the US sensor trigger
-    tim2_stop();
-}
-
-void USART2_IRQHandler(void)
-{
-    if (USART2->SR & SR_RXNE)
-    {
-        USART2_RX_callback();
-    }
-}
-
-void TIM1_CC_IRQHandler(void)
-{
-    if (TIM1->SR & SR_CC1IF)
-    {
-    }
-}
-
-void TIM2_IRQHandler(void)
-{
-    if (TIM2->SR & SR_CC2IF)
-    {
-        TIM2->SR &= ~(SR_CC2IF | SR_UIF);
-        TIM2_callback();
-    }
-}
-
-void TIM3_IRQHandler(void)
-{
-    if (TIM3->SR & SR_CC1IF)
-    {
-        TIM3->SR &= ~(SR_CC1IF | SR_UIF);
     }
 }
 

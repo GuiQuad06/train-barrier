@@ -46,6 +46,13 @@ static inline uint16_t tune_prescaler(uint32_t occ, uint32_t clk)
     return (clk / occ) - 1;
 }
 
+void TIM2_callback(void)
+{
+    // When CNT > CCR the irq is triggered and the output is set to 0
+    // So timer is stopped as we want only one pulse for the US sensor trigger
+    tim2_stop();
+}
+
 void tim1_init(void)
 {
     // IO PA8 -> TIM1_CH1 : intput dir / AFIO (already input mode by default) do nothing

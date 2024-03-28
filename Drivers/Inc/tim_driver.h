@@ -8,9 +8,11 @@
 #ifndef INC_TIM_DRIVER_H_
 #define INC_TIM_DRIVER_H_
 
+#include <stdint.h>
+
 void tim1_init(void);
 void tim2_init(void);
-void tim3_init(void);
+void tim3_init(uint16_t nom_pulse);
 void tim2_start(void);
 void tim2_stop(void);
 void tim3_start(void);

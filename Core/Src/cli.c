@@ -6,6 +6,7 @@
  */
 #include "cli.h"
 
+#include "servo.h"
 #include "tim_driver.h"
 
 #include <string.h>
@@ -23,7 +24,7 @@ cli_menu_t cli_menu[] = {{"barrier", cmd_servo, "Control the servomotor : (open/
                          {"display", cmd_oled, "Display a msg on the OLED screen : (<string>)"},
                          {"distance", cmd_us_sensor, "Read the obstacle distance from the US sensor"},
                          {"pulse", cmd_send_pulse, "Send a 10us pulse"},
-                         {"pwm", cmd_pwm_servo, "Control PWM : (start/stop)"},
+                         {"pwm", cmd_pwm_servo, "Control PWM : (start/stop/<integer>)"},
                          {0, 0, 0}};
 
 str_status_t str_status[] = {{STATUS_OK, "Tout va bien"},
@@ -107,8 +108,6 @@ void print_feedback(cli_status_t sts)
 
 cli_status_t cmd_servo(int argc, char **argv)
 {
-    cli_status_t status = STATUS_OK;
-
     if (argc < 1)
     {
         return STATUS_PARAMETER_MISSING;
@@ -117,11 +116,16 @@ cli_status_t cmd_servo(int argc, char **argv)
     {
         if (strcmp(argv[1], "open") && strcmp(argv[1], "close"))
         {
-            status = STATUS_KO;
+            return STATUS_PARAMETER_UNKNOWN;
+        }
+
+        if (servo_move(argv[1]) != SERVO_OK)
+        {
+            return STATUS_SERVO_NOK;
         }
     }
 
-    return status;
+    return STATUS_OK;
 }
 
 cli_status_t cmd_oled(int argc, char **argv)
@@ -175,8 +179,31 @@ cli_status_t cmd_pwm_servo(int argc, char **argv)
         }
         else
         {
-            return STATUS_PARAMETER_UNKNOWN;
+            (void) servo_set_pulse(atoi(argv[1]));
         }
     }
     return status;
+}
+
+/**
+ * @brief Function to convert string to integer
+ *
+ * @return int
+ */
+int atoi(char *str)
+{
+    // Initialize result
+    int res = 0;
+
+    // Iterate through all characters
+    // of input string and update result
+    // take ASCII character of corresponding digit and
+    // subtract the code from '0' to get numerical
+    // value and multiply res by 10 to shuffle
+    // digits left to update running total
+    for (int i = 0; str[i] != '\0'; ++i)
+        res = res * 10 + str[i] - '0';
+
+    // return result.
+    return res;
 }

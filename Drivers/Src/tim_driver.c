@@ -10,8 +10,6 @@
 #include "rcc_driver.h"
 #include "stm32f1xx.h"
 
-#include <stdint.h>
-
 // RCC
 #define TIM2EN (1U << 0) // APB1
 
@@ -41,8 +39,6 @@
 #define TIM3_COUNT_FREQ  (4000000u) // 4 MHz (250 ns cycle)
 #define TIM3_COUNT_F_MHZ (4u)
 #define MAX_COUNT        UINT16_MAX
-
-#define NOMINAL_PULSE_WIDTH (1500u) // Servo Nominal Pulse width in um
 
 static inline uint16_t tune_prescaler(uint32_t occ, uint32_t clk)
 {
@@ -97,7 +93,7 @@ void tim2_init(void)
     TIM2->CCMR1 |= (OC2M_2 | OC2M_1);
 }
 
-void tim3_init(void)
+void tim3_init(uint16_t nom_pulse)
 {
     // IO PA6 -> TIM3_CH1 : output dir / AFIO push pull
     GPIOA->CRL |= (1U << 24);
@@ -109,8 +105,8 @@ void tim3_init(void)
     TIM3->PSC = tune_prescaler(TIM3_COUNT_FREQ, APB1_CLK);
 
     // Write the ARR & CCR
-    TIM3->ARR  = MAX_COUNT - 1u;                         // 65535 x 250 ns = 20 ms
-    TIM3->CCR1 = NOMINAL_PULSE_WIDTH * TIM3_COUNT_F_MHZ; // 1500 us pulse width (nominal for servo)
+    TIM3->ARR  = MAX_COUNT - 1u;               // 65535 x 250 ns = 20 ms
+    TIM3->CCR1 = nom_pulse * TIM3_COUNT_F_MHZ; // 1500 us pulse width (nominal for servo)
 
     // Set CCxIE for interrupt
     TIM3->DIER |= CC1IE;

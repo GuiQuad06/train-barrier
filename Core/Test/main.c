@@ -18,6 +18,7 @@
 
 #include "cli.h"
 #include "rcc_driver.h"
+#include "servo.h"
 #include "tim_driver.h"
 #include "usart_driver.h"
 
@@ -32,12 +33,25 @@
 #include <stdio.h>
 #include <string.h>
 
+servo_handler_t barrier;
+
 volatile uint8_t message_received = 0;
 volatile uint8_t cnt              = 0;
 
 static uint8_t rx_buf;
 static uint8_t byte_count = 0;
 static char cli_cmd[INPUT_BUF_SIZE]; /** Input buffer for the command line interpreter. */
+
+static void init_drivers(void)
+{
+    rcc_init();
+    // Read the echo
+    tim1_init();
+    // Send one trigger pulse
+    tim2_init();
+    // Com UART for CLI
+    usart2_init();
+}
 
 static void USART2_RX_callback(void)
 {
@@ -59,16 +73,6 @@ static void TIM2_callback(void)
     // When CNT > CCR the irq is triggered and the output is set to 0
     // So timer is stopped as we want only one pulse for the US sensor trigger
     tim2_stop();
-}
-
-static void TIM3_callback(void)
-{
-    /*	if (cnt > 100)
-        {
-            tim3_stop();
-            cnt = 0;
-        }
-        cnt++;*/
 }
 
 void USART2_IRQHandler(void)
@@ -100,7 +104,6 @@ void TIM3_IRQHandler(void)
     if (TIM3->SR & SR_CC1IF)
     {
         TIM3->SR &= ~(SR_CC1IF | SR_UIF);
-        TIM3_callback();
     }
 }
 
@@ -113,11 +116,9 @@ int __io_putchar(int c)
 
 int main(void)
 {
-    rcc_init();
-    tim1_init();
-    tim2_init();
-    tim3_init();
-    usart2_init();
+    init_drivers();
+
+    (void) servo_init(&barrier);
 
     printf("Bienvenue dans l'application de test hardware de la barriere de Train !!\n");
 

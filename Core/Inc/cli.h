@@ -41,6 +41,7 @@ cli_status_t cmd_us_sensor(int argc, char **argv);
 cli_status_t cmd_send_pulse(int argc, char **argv);
 cli_status_t cmd_pwm_servo(int argc, char **argv);
 cli_status_t cmd_read_dist(int argc, char **argv);
+cli_status_t cmd_write_gpio(int argc, char **argv);
 
 int atoi(char *str);
 

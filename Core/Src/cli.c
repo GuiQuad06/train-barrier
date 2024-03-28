@@ -6,6 +6,7 @@
  */
 #include "cli.h"
 
+#include "gpio_driver.h"
 #include "servo.h"
 #include "tim_driver.h"
 #include "us_sensor.h"
@@ -26,6 +27,8 @@ cli_menu_t cli_menu[] = {{"barrier", cmd_servo, "Control the servomotor : (open/
                          {"distance", cmd_us_sensor, "Read the obstacle distance from the US sensor"},
                          {"pulse", cmd_send_pulse, "Send a 10us pulse"},
                          {"pwm", cmd_pwm_servo, "Control PWM : (start/stop/<integer>)"},
+                         {"read_dist", cmd_read_dist, "Read the distance from the US sensor"},
+                         {"gpio", cmd_write_gpio, "Write to GPIO : (set/reset)"},
                          {0, 0, 0}};
 
 str_status_t str_status[] = {{STATUS_OK, "Tout va bien"},
@@ -194,6 +197,28 @@ cli_status_t cmd_read_dist(int argc, char **argv)
 
     us_sensor_read_dist();
 
+    return status;
+}
+
+cli_status_t cmd_write_gpio(int argc, char **argv)
+{
+    cli_status_t status = STATUS_OK;
+
+    if (argc < 1)
+    {
+        return STATUS_PARAMETER_MISSING;
+    }
+    else
+    {
+        if (!strcmp(argv[1], "set"))
+        {
+            gpio_set(GPIOA, 5u);
+        }
+        else if (!strcmp(argv[1], "reset"))
+        {
+            gpio_reset(GPIOA, 5u);
+        }
+    }
     return status;
 }
 

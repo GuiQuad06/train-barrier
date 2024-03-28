@@ -21,6 +21,7 @@
 #include "servo.h"
 #include "stm32f1xx.h"
 #include "tim_driver.h"
+#include "us_sensor.h"
 #include "usart_driver.h"
 
 #include <stdint.h>
@@ -28,6 +29,7 @@
 #include <string.h>
 
 servo_handler_t barrier;
+us_handler_t us_sensor;
 
 volatile uint8_t message_received = 0;
 volatile uint8_t cnt              = 0;
@@ -74,6 +76,7 @@ int main(void)
     init_drivers();
 
     (void) servo_init(&barrier);
+    (void) us_sensor_init(&us_sensor);
 
     printf("Bienvenue dans l'application de test hardware de la barriere de Train !!\n");
 

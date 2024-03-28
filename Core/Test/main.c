@@ -41,10 +41,7 @@ static char cli_cmd[INPUT_BUF_SIZE]; /** Input buffer for the command line inter
 static void init_drivers(void)
 {
     rcc_init();
-    // Read the echo
-    tim1_init();
-    // Send one trigger pulse
-    tim2_init();
+
     // Com UART for CLI
     usart2_init();
 }

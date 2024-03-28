@@ -8,6 +8,7 @@
 
 #include "servo.h"
 #include "tim_driver.h"
+#include "us_sensor.h"
 
 #include <string.h>
 
@@ -182,6 +183,17 @@ cli_status_t cmd_pwm_servo(int argc, char **argv)
             (void) servo_set_pulse(atoi(argv[1]));
         }
     }
+    return status;
+}
+
+cli_status_t cmd_read_dist(int argc, char **argv)
+{
+    cli_status_t status = STATUS_OK;
+
+    tim2_start();
+
+    us_sensor_read_dist();
+
     return status;
 }
 

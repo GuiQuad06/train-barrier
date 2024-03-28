@@ -21,10 +21,12 @@ typedef struct
     uint8_t start_trigg : 1;
     uint16_t pulse_width; // Pulse width in us
     uint16_t dist;        // Distance in cm
+    uint8_t is_ready : 1;
 } us_handler_t;
 
 extern us_handler_t us_sensor;
 
 status_us_t us_sensor_init(us_handler_t *sensor);
+status_us_t us_sensor_read_dist(void);
 
 #endif /* INC_US_SENSOR_H_ */

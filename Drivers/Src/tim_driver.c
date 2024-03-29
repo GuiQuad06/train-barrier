@@ -18,6 +18,7 @@
 #define CEN    (1U << 0)
 #define ARPE   (1U << 7)
 // DIER
+#define UIE    (1U << 0)
 #define CC1IE  (1U << 1)
 #define CC2IE  (1U << 2)
 // CCMR1
@@ -40,11 +41,13 @@
 #define TS_0   (1U << 4)
 
 // CLK
-#define TIM1_COUNT_FREQ  (25000u)   // 25kHz (40 us cycle)
-#define TIM2_COUNT_FREQ  (100000u)  // 100kHz (10 us cycle)
-#define TIM3_COUNT_FREQ  (4000000u) // 4 MHz (250 ns cycle)
+#define TIM1_COUNT_FREQ  (25000u)   // 25kHz (40 us count cycle)
+#define TIM2_COUNT_FREQ  (1000000u) // 1MHz (1 us count cycle)
+#define TIM3_COUNT_FREQ  (4000000u) // 4 MHz (250 ns count cycle)
 #define TIM3_COUNT_F_MHZ (4u)
-#define MAX_COUNT        UINT16_MAX
+#define TIM4_COUNT_FREQ  (40000u) // 40kHz (25 us count cycle)
+
+#define MAX_COUNT UINT16_MAX
 
 static inline uint16_t tune_prescaler(uint32_t occ, uint32_t clk)
 {
@@ -104,8 +107,8 @@ void tim2_init(void)
     TIM2->PSC = tune_prescaler(TIM2_COUNT_FREQ, APB1_CLK);
 
     // Write the ARR & CCR
-    TIM2->ARR  = MAX_COUNT - 1u; // 65535 x 10us = 655ms
-    TIM2->CCR2 = 1u;             // 10us pulse width
+    TIM2->ARR  = 20u - 1u; // 20 x 1us = 20 us
+    TIM2->CCR2 = 10u;      // 10us pulse width
 
     // Set CCxIE for interrupt
     TIM2->DIER |= CC2IE;
@@ -136,6 +139,18 @@ void tim3_init(uint16_t nom_pulse)
     TIM3->CCMR1 |= (OC1M_2 | OC1M_1);
 }
 
+void tim4_init(uint16_t period_in_sec)
+{
+    // Tune prescaler
+    TIM4->PSC = tune_prescaler(TIM4_COUNT_FREQ, APB1_CLK);
+
+    // Write the ARR & CCR
+    TIM4->ARR = ((1 / period_in_sec) * TIM4_COUNT_FREQ) - 1u;
+
+    // Set general update event for interrupt (overflowed)
+    TIM4->DIER |= UIE;
+}
+
 void tim1_start(void)
 {
     // Enable Interrupts
@@ -156,8 +171,8 @@ void tim1_stop(void)
 
 void tim2_start(void)
 {
-    // CCxP=1 and CCxE=1
-    TIM2->CCER |= (CC2P | CC2E);
+    // CCxP=0 and CCxE=1
+    TIM2->CCER |= (CC2E);
 
     // Enable NVIC for the TIMER
     NVIC_EnableIRQ(TIM2_IRQn);
@@ -200,4 +215,22 @@ void tim3_stop(void)
 
     // Disable Timer with CEN
     TIM3->CR1 &= ~(CEN);
+}
+
+void tim4_start(void)
+{
+    // Enable NVIC for the TIMER
+    NVIC_EnableIRQ(TIM4_IRQn);
+
+    // Enable Timer with CEN
+    TIM4->CR1 |= (CEN);
+}
+
+void tim4_stop(void)
+{
+    // Disable NVIC for the TIMER
+    NVIC_DisableIRQ(TIM4_IRQn);
+
+    // Disable Timer with CEN
+    TIM4->CR1 &= ~(CEN);
 }

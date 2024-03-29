@@ -27,7 +27,10 @@ typedef struct
 extern us_handler_t us_sensor;
 
 void TIM1_callback(void);
+void TIM4_callback(void);
 status_us_t us_sensor_init(us_handler_t *sensor);
+status_us_t us_sensor_start(void);
+status_us_t us_sensor_stop(void);
 status_us_t us_sensor_read_dist(void);
 
 #endif /* INC_US_SENSOR_H_ */

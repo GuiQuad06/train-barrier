@@ -27,6 +27,14 @@ void TIM1_callback(void)
     us_sensor.is_ready = 1u;
 }
 
+void TIM4_callback(void)
+{
+    us_sensor.start_trigg = 1;
+
+    // Send a 10u pulse every TIM4 timeout
+    tim2_start();
+}
+
 status_us_t us_sensor_init(us_handler_t *sensor)
 {
     sensor->dist        = 0;
@@ -38,9 +46,24 @@ status_us_t us_sensor_init(us_handler_t *sensor)
     tim1_init();
     // TIM2 (Pulse) init
     tim2_init();
-    // TODO TIM4 init -> Master timeout every 2secs and trigg the slave TIM2 Pulse
+    // TIM4 init -> Master timeout every 2secs and trigg the slave TIM2 Pulse
+    tim4_init(2);
 
+    return US_OK;
+}
+
+status_us_t us_sensor_start(void)
+{
     tim1_start();
+    tim4_start();
+
+    return US_OK;
+}
+
+status_us_t us_sensor_stop(void)
+{
+    tim1_stop();
+    tim4_stop();
 
     return US_OK;
 }

@@ -24,7 +24,7 @@ typedef struct
 
 cli_menu_t cli_menu[] = {{"barrier", cmd_servo, "Control the servomotor : (open/close)"},
                          {"display", cmd_oled, "Display a msg on the OLED screen : (<string>)"},
-                         {"distance", cmd_us_sensor, "Read the obstacle distance from the US sensor"},
+                         {"distance", cmd_us_sensor, "Read the distance from the US sensor every second (start/stop)"},
                          {"pulse", cmd_send_pulse, "Send a 10us pulse"},
                          {"pwm", cmd_pwm_servo, "Control PWM : (start/stop/<integer>)"},
                          {"read_dist", cmd_read_dist, "Read the distance from the US sensor"},
@@ -151,6 +151,21 @@ cli_status_t cmd_us_sensor(int argc, char **argv)
 {
     cli_status_t status = STATUS_OK;
 
+    if (argc < 1)
+    {
+        return STATUS_PARAMETER_MISSING;
+    }
+    else
+    {
+        if (!strcmp(argv[1], "start"))
+        {
+            (void) us_sensor_start();
+        }
+        else if (!strcmp(argv[1], "stop"))
+        {
+            (void) us_sensor_stop();
+        }
+    }
     return status;
 }
 
@@ -194,6 +209,7 @@ cli_status_t cmd_read_dist(int argc, char **argv)
     cli_status_t status = STATUS_OK;
 
     tim2_start();
+    tim1_start();
 
     us_sensor_read_dist();
 

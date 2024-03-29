@@ -27,7 +27,7 @@ void TIM1_CC_IRQHandler(void)
 {
     if (TIM1->SR & SR_CC2IF)
     {
-        TIM2->SR &= ~(SR_CC2IF | SR_UIF);
+        TIM1->SR &= ~(SR_CC2IF | SR_UIF);
         TIM1_callback();
     }
 }
@@ -46,5 +46,14 @@ void TIM3_IRQHandler(void)
     if (TIM3->SR & SR_CC1IF)
     {
         TIM3->SR &= ~(SR_CC1IF | SR_UIF);
+    }
+}
+
+void TIM4_IRQHandler(void)
+{
+    if (TIM4->SR & SR_UIF)
+    {
+        TIM4->SR &= ~(SR_UIF);
+        TIM4_callback();
     }
 }

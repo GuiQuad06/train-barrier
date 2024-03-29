@@ -11,6 +11,7 @@
 // CLK public constants
 #define SYS_FREQ (8000000U)
 #define APB1_CLK SYS_FREQ
+#define APB2_CLK SYS_FREQ
 
 void rcc_init(void);
 

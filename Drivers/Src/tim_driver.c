@@ -26,6 +26,7 @@
 #define IC1F_0 (1U << 4)
 #define OC1M_2 (1U << 6)
 #define OC1M_1 (1U << 5)
+#define CC2S_1 (1U << 9)
 #define OC2M_2 (1U << 14)
 #define OC2M_1 (1U << 13)
 // CCER
@@ -33,8 +34,13 @@
 #define CC1E   (1U << 0)
 #define CC2P   (1U << 5)
 #define CC2E   (1U << 4)
+// SMCR
+#define SMS_2  (1U << 2)
+#define TS_2   (1U << 6)
+#define TS_0   (1U << 4)
 
 // CLK
+#define TIM1_COUNT_FREQ  (25000u)   // 25kHz (40 us cycle)
 #define TIM2_COUNT_FREQ  (100000u)  // 100kHz (10 us cycle)
 #define TIM3_COUNT_FREQ  (4000000u) // 4 MHz (250 ns cycle)
 #define TIM3_COUNT_F_MHZ (4u)
@@ -57,25 +63,33 @@ void tim1_init(void)
 {
     // IO PA8 -> TIM1_CH1 : intput dir / AFIO (already input mode by default) do nothing
 
-    // Set the Prescaler
-    TIM1->PSC = 0u;
+    // Tune prescaler
+    TIM1->PSC = tune_prescaler(TIM1_COUNT_FREQ, APB2_CLK);
 
-    // Write the ARR
+    // Set period
     TIM1->ARR = MAX_COUNT - 1u;
 
-    // Autoreload preload enable
-    TIM1->CR1 |= ARPE;
+    // Select active input => CC1S = 01 in CCMR1 register (select TI1 -> TIM1_CH1)
+    TIM1->CCMR1 |= CC1S_0;
 
-    // Select active input: IC1 (so TI1) to CCR1 (CCMR1 reg) + input filter
-    TIM1->CCMR1 |= (CC1S_0 | IC1F_1 | IC1F_0);
+    // Select polarity for CC1P = 0 in CCER register (already reset, do nothing)
 
-    // Enable capture (CCER reg)
-    TIM1->CCER |= CC1E;
+    // Select active input => CC2S = 10 in CCMR1 register (select TI1 -> TIM1_CH1)
+    TIM1->CCMR1 |= CC2S_1;
 
-    // Set CCxIE for interrupt
-    TIM1->DIER |= CC1IE;
-    // Enable NVIC for the TIMER
-    NVIC_EnableIRQ(TIM1_CC_IRQn);
+    // Select polarity for CC2P = 1 in CCER register (falling edge)
+    TIM1->CCER |= CC2P;
+
+    // TS = 101 in SMCR register
+    TIM1->SMCR |= (TS_2 | TS_0);
+
+    // SMS = 100 in SMCR register
+    TIM1->SMCR |= SMS_2;
+
+    // CC1E = 1 & CC2E = 1 in CCER register
+    TIM1->CCER |= (CC1E | CC2E);
+
+    TIM1->DIER |= CC2IE;
 }
 
 void tim2_init(void)
@@ -120,6 +134,24 @@ void tim3_init(uint16_t nom_pulse)
 
     // OCxM=110, OCxPE=0 (default), to OC2 PWM mode 1
     TIM3->CCMR1 |= (OC1M_2 | OC1M_1);
+}
+
+void tim1_start(void)
+{
+    // Enable Interrupts
+    NVIC_EnableIRQ(TIM1_CC_IRQn);
+
+    // Enable Timer with CEN
+    TIM1->CR1 |= CEN;
+}
+
+void tim1_stop(void)
+{
+    // Disable Timer with CEN
+    TIM1->CR1 &= ~(CEN);
+
+    // Disable NVIC for the TIMER
+    NVIC_DisableIRQ(TIM1_CC_IRQn);
 }
 
 void tim2_start(void)

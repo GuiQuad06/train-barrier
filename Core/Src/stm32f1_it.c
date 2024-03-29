@@ -6,6 +6,7 @@
  */
 #include "main.h"
 #include "tim_driver.h"
+#include "us_sensor.h"
 
 // Used for Register reading in ISR:
 #include "stm32f1xx.h"
@@ -24,8 +25,10 @@ void USART2_IRQHandler(void)
 
 void TIM1_CC_IRQHandler(void)
 {
-    if (TIM1->SR & SR_CC1IF)
+    if (TIM1->SR & SR_CC2IF)
     {
+        TIM2->SR &= ~(SR_CC2IF | SR_UIF);
+        TIM1_callback();
     }
 }
 

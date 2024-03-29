@@ -11,11 +11,21 @@
 #include "stm32f1xx.h"
 #include "tim_driver.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define FIVE_CM (5000u)
 
 static uint16_t us_sensor_width_to_dist(uint16_t pulse_width);
+
+void TIM1_callback(void)
+{
+    us_sensor.pulse_width = TIM1->CCR2 * 40u;
+
+    us_sensor.dist = us_sensor_width_to_dist(us_sensor.pulse_width);
+
+    us_sensor.is_ready = 1u;
+}
 
 status_us_t us_sensor_init(us_handler_t *sensor)
 {
@@ -30,6 +40,8 @@ status_us_t us_sensor_init(us_handler_t *sensor)
     tim2_init();
     // TODO TIM4 init -> Master timeout every 2secs and trigg the slave TIM2 Pulse
 
+    tim1_start();
+
     return US_OK;
 }
 
@@ -40,7 +52,9 @@ status_us_t us_sensor_read_dist(void)
         // Wait for the pulse to be sent and echo to be received
     }
 
-    us_sensor.dist = us_sensor_width_to_dist(us_sensor.pulse_width);
+    us_sensor.is_ready = 0;
+
+    printf("%ld\n", us_sensor.dist);
 
     if (us_sensor.dist < FIVE_CM)
     {

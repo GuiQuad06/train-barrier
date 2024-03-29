@@ -14,6 +14,8 @@ void TIM2_callback(void);
 void tim1_init(void);
 void tim2_init(void);
 void tim3_init(uint16_t nom_pulse);
+void tim1_start(void);
+void tim1_stop(void);
 void tim2_start(void);
 void tim2_stop(void);
 void tim3_start(void);

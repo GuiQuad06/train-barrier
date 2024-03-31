@@ -28,8 +28,16 @@
 #define THRESHOLD_DIST (7000u)
 #define LED_PIN        (5u)
 
+typedef enum
+{
+    FAR,
+    CLOSE
+} proximity_state_t;
+
 servo_handler_t barrier;
 us_handler_t us_sensor;
+
+volatile proximity_state_t prev_state_flag = FAR;
 
 static void init_drivers(void)
 {
@@ -69,15 +77,32 @@ int main(void)
 
         us_sensor.is_ready = 0;
 
-        if (us_sensor.dist < THRESHOLD_DIST)
+        // If we are far from the barrier and the barrier is already closed,
+        // we want to avoid send the close command to the servo which cause a glitch in servo position
+        if (us_sensor.dist > THRESHOLD_DIST)
         {
-            servo_move("open");
-            gpio_set(GPIOA, LED_PIN);
+            if (FAR == prev_state_flag)
+            {
+                // Nothing to do
+            }
+            else if (CLOSE == prev_state_flag)
+            {
+                servo_move("close");
+                gpio_set(GPIOA, LED_PIN);
+                prev_state_flag = FAR;
+            }
+            else
+            {
+                // MISRA C:2012 Rule 15.7
+            }
         }
+        // For this case and to enforce security,
+        // the open command is always triggered to the servo
         else
         {
-            servo_move("close");
+            servo_move("open");
             gpio_reset(GPIOA, LED_PIN);
+            prev_state_flag = CLOSE;
         }
     }
 }

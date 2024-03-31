@@ -46,6 +46,24 @@ void usart2_init(void)
     // Configure the USART
     uart_set_baudrate(USART2, APB1_CLK, UART_BAUDRATE);
 
+    // Configure xfer direction (TX channel only)
+    USART2->CR1 = (CR1_TE);
+
+    // Enable the USART module
+    USART2->CR1 |= CR1_UE;
+}
+
+void usart2_init_test(void)
+{
+    // Set PA2 to AF Out dir (PA3 set as input by default)
+    GPIOA->CRL |= (1U << 8);
+    GPIOA->CRL &= ~(1U << 9);
+    GPIOA->CRL &= ~(1U << 10);
+    GPIOA->CRL |= (1U << 11);
+
+    // Configure the USART
+    uart_set_baudrate(USART2, APB1_CLK, UART_BAUDRATE);
+
     // Configure xfer direction (TX channel and RX by interrupt)
     USART2->CR1 = (CR1_TE | CR1_RE | CR1_RXNEIE);
 

@@ -46,7 +46,7 @@ static void init_drivers(void)
     gpio_init();
 
     // Com UART for CLI
-    usart2_init();
+    usart2_init_test();
 }
 
 void USART2_RX_callback(void)

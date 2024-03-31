@@ -15,6 +15,7 @@
 #define SR_CC2IF (1U << 2)
 #define SR_UIF   (1U << 0)
 
+#ifdef TEST
 void USART2_IRQHandler(void)
 {
     if (USART2->SR & SR_RXNE)
@@ -22,6 +23,7 @@ void USART2_IRQHandler(void)
         USART2_RX_callback();
     }
 }
+#endif
 
 void TIM1_CC_IRQHandler(void)
 {

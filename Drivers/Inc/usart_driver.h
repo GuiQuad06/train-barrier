@@ -8,7 +8,12 @@
 #ifndef USART_DRIVER_H_
 #define USART_DRIVER_H_
 
-void usart2_write(int ch);
+#ifndef TEST
 void usart2_init(void);
+#else
+void usart2_init_test(void);
+#endif
+
+void usart2_write(int ch);
 
 #endif /* USART_DRIVER_H_ */

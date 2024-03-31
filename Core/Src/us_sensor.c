@@ -47,7 +47,7 @@ status_us_t us_sensor_init(us_handler_t *sensor)
     // TIM2 (Pulse) init
     tim2_init();
     // TIM4 init -> Master timeout every 2secs and trigg the slave TIM2 Pulse
-    tim4_init(2);
+    tim4_init(1);
 
     return US_OK;
 }

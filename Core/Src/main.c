@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define THRESHOLD_DIST (6000u)
+#define THRESHOLD_DIST (7000u)
 #define LED_PIN        (5u)
 
 typedef enum
